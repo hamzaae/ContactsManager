@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DevoirLibre.iml" filepath="$PROJECT_DIR$/DevoirLibre.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ContactsManager.iml" filepath="$PROJECT_DIR$/ContactsManager.iml" />
     </modules>
   </component>
 </project>
