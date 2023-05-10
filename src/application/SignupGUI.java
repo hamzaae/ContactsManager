@@ -1,5 +1,7 @@
 package application;
 
+import managers.Manager;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -159,6 +161,19 @@ public class SignupGUI extends JDialog{
                     "Try again", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        manager = addManagerToDb(email, password, firstName, lastName, phoneNumber, adress, gender, autoSignIn);
+        if (manager != null) {dispose();}
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred, please try again later",
+                    "Sorry", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    Manager manager;
+    private Manager addManagerToDb(String email, String password, String firstName, String lastName, String phoneNumber, String adress, String gender, Boolean autoSignIn) {
+
+        return null;
     }
 
     public boolean isValidNameCharacter(char c) {
