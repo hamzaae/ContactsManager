@@ -1,11 +1,11 @@
-package models;
+package org.example.models;
 
-import managers.ContactManager;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Contact {
-    private UUID id;
+    private String id;
     private String nom;
     private String prenom;
     private String tel1;
@@ -14,14 +14,16 @@ public class Contact {
     private String email_perso;
     private String email_profess;
     private Genre genre;
+    private Manager manager;
+    private List<Group> groups = new ArrayList<Group>();
 
     public enum Genre {
         MALE,
         FEMALE
     }
 
-    public Contact(String nom, String prenom, String tel1, String tel2, String adresse, String email_perso, String email_profess, char genre) {
-        this.id = UUID.randomUUID();
+    public Contact(String nom, String prenom, String tel1, String tel2, String adresse, String email_perso, String email_profess, Genre genre, Manager manager) {
+        this.id = UUID.randomUUID().toString();
         this.nom = nom;
         this.prenom = prenom;
         this.tel1 = tel1;
@@ -29,16 +31,12 @@ public class Contact {
         this.adresse = adresse;
         this.email_perso = email_perso;
         this.email_profess = email_profess;
-        if (genre=='m') {this.genre = Genre.MALE;}
-        else {this.genre = Genre.FEMALE;}
+        this.genre = genre;
+        this.manager = manager;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getNom() {
@@ -104,6 +102,10 @@ public class Contact {
     public void setGenre(char genre) {
         if (genre=='m') {this.genre = Genre.MALE;}
         else {this.genre = Genre.FEMALE;}
+    }
+
+    public String getManagerId(){
+        return this.manager.getIdManager();
     }
 
     @Override

@@ -1,6 +1,6 @@
-import managers.*;
-import models.*;
-import application.*;
+import org.example.managers.*;
+import org.example.application.*;
+import org.example.models.*;
 
 public class Main {
     public static void main(String[] args) {

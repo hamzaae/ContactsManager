@@ -1,7 +1,6 @@
-package application;
+package org.example.application;
 
 import javax.swing.*;
-import java.awt.*;
 import java.net.URL;
 
 public class LoginGUI extends JDialog{
@@ -33,6 +32,7 @@ public class LoginGUI extends JDialog{
         }
 
         setVisible(true);
+
     }
 
 /*

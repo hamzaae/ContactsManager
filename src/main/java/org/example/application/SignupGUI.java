@@ -1,6 +1,6 @@
-package application;
+package org.example.application;
 
-import managers.Manager;
+import org.example.models.Manager;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -55,18 +55,19 @@ public class SignupGUI extends JDialog{
             @Override
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (!isValidNameCharacter(c) && !isControlKey(e)) {
+                if (!isValidNameCharacter(c)) {
                     e.consume(); // prevent the character from being added to the text field
-                    textFirstNameError.setText("* Error");
                 }
             }
             @Override
             public void keyPressed(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (isValidNameCharacter(c) || isControlKey(e)){
+                if (!isValidNameCharacter(c) && e.getKeyCode() != 8 && e.getKeyCode() != 16 && e.getKeyCode() != 20) {
+                    e.consume(); // prevent the character from being added to the text field
+                    textFirstNameError.setText("* Error");
+                } else if (isValidNameCharacter(c) || e.getKeyCode() == 8 || e.getKeyCode() == 16 || e.getKeyCode() == 20){
                     textFirstNameError.setText("");
                 }
-
             }
 
         });//TODO : check logique
@@ -74,18 +75,19 @@ public class SignupGUI extends JDialog{
             @Override
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (!isValidNameCharacter(c) && !isControlKey(e)) {
+                if (!isValidNameCharacter(c)) {
                     e.consume(); // prevent the character from being added to the text field
-                    textLastNameError.setText("* Error");
                 }
             }
             @Override
             public void keyPressed(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (isValidNameCharacter(c) || isControlKey(e)){
+                if (!isValidNameCharacter(c) && e.getKeyCode() != 8 && e.getKeyCode() != 16 && e.getKeyCode() != 20) {
+                    e.consume(); // prevent the character from being added to the text field
+                    textLastNameError.setText("* Error");
+                } else if (isValidNameCharacter(c) || e.getKeyCode() == 8 || e.getKeyCode() == 16 || e.getKeyCode() == 20){
                     textLastNameError.setText("");
                 }
-
             }
 
         });
@@ -93,9 +95,8 @@ public class SignupGUI extends JDialog{
             @Override
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (!Character.isDigit(c) && !isControlKey(e)) {
+                if (!Character.isDigit(c)) {
                     e.consume();
-                    textPhoneNumberError.setText("* Error numbers");
                 }
                 if (textPhoneNumber.getText().length()>9){
                     e.consume();
@@ -105,10 +106,13 @@ public class SignupGUI extends JDialog{
             @Override
             public void keyPressed(KeyEvent e) {
                 char c = e.getKeyChar();
-                if (Character.isDigit(c) || isControlKey(e)){
-                    textLastNameError.setText("");
-                }
                 if (textPhoneNumber.getText().length()<=10){
+                    textPhoneNumberError.setText("");
+                }
+                if (!Character.isDigit(c) && e.getKeyCode() != 8 && e.getKeyCode() != 16 && e.getKeyCode() != 20) {
+                    e.consume(); // prevent the character from being added to the text field
+                    textPhoneNumberError.setText("* Error");
+                } else if (Character.isDigit(c) || e.getKeyCode() == 8 || e.getKeyCode() == 16 || e.getKeyCode() == 20){
                     textPhoneNumberError.setText("");
                 }
 
@@ -177,7 +181,7 @@ public class SignupGUI extends JDialog{
     }
 
     public boolean isValidNameCharacter(char c) {
-        return Character.isLetter(c) || c == ' ' || c == '-' || c == '\'';
+        return Character.isLetter(c) || c == ' ' || c == '-' || c == '\'' || Character.isWhitespace(c);
     }
     public boolean isControlKey(KeyEvent e) {
         int keyCode = e.getKeyCode();
