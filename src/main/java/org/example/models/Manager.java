@@ -1,6 +1,8 @@
 package org.example.models;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Manager {
@@ -12,6 +14,7 @@ public class Manager {
     private Genre genre;
     private String email;
     private String password;
+    private List<Contact> contacts = new ArrayList<Contact>();
 
     public enum Genre {
         MAN,
