@@ -1,5 +1,7 @@
 package org.example.application;
 
+import org.example.database.DataBaseException;
+import org.example.database.ManagerDao;
 import org.example.models.Manager;
 
 import javax.swing.*;
@@ -48,7 +50,11 @@ public class SignupGUI extends JDialog{
         confirmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                registerManager();
+                try {
+                    registerManager();
+                } catch (DataBaseException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
         textFirstName.addKeyListener(new KeyAdapter() {
@@ -70,7 +76,7 @@ public class SignupGUI extends JDialog{
                 }
             }
 
-        });//TODO : check logique
+        });
         textLastName.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -124,7 +130,7 @@ public class SignupGUI extends JDialog{
         setVisible(true);
     }
 
-    private void registerManager() {
+    private void registerManager() throws DataBaseException {
         String email = textEmail.getText();
         String password =String.valueOf(passwordFieldRegister.getPassword());
         String passwordConfirm =String.valueOf(passwordFieldRegisterConfirm.getPassword());
@@ -132,15 +138,15 @@ public class SignupGUI extends JDialog{
         String lastName = textLastName.getText();
         String phoneNumber = textPhoneNumber.getText();
         String adress = textAdress.getText();
-        String gender;
-        if (manRadioButton.isSelected()) {gender = "Man";}
-        else if (womanRadioButton.isSelected()) {gender = "Woman";}
-        else {gender = "None selected";}
+        Manager.Genre gender = null;
+        if (manRadioButton.isSelected()) {gender = Manager.Genre.MAN;}
+        else if (womanRadioButton.isSelected()){gender = Manager.Genre.WOMAN;}
+
         Boolean autoSignIn = autoSignInCheckBox.isSelected();
 
         // check if any field is empty
         if (email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty() || firstName.isEmpty()
-                || lastName.isEmpty() || phoneNumber.isEmpty() || adress.isEmpty() || gender.equals("None selected")){
+                || lastName.isEmpty() || phoneNumber.isEmpty() || adress.isEmpty() || gender==null){
             JOptionPane.showMessageDialog(this,
                     "Please enter all the fields",
                     "Try again", JOptionPane.ERROR_MESSAGE);
@@ -165,29 +171,35 @@ public class SignupGUI extends JDialog{
                     "Try again", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        manager = addManagerToDb(email, password, firstName, lastName, phoneNumber, adress, gender, autoSignIn);
-        if (manager != null) {dispose();}
+        Manager newManager = new Manager(firstName, lastName, phoneNumber, adress, gender, email, password);
+        manager = ManagerDao.signup(newManager);
+
+        if (manager != null) {
+            if(manager.getIdManager()==null) {
+                JOptionPane.showMessageDialog(this,
+                        "Email or phone number already exists!",
+                        "Try again", JOptionPane.ERROR_MESSAGE);
+            }
+            else{
+                JOptionPane.showMessageDialog(this,
+                        "New manager created successfully!",
+                        "Done!", JOptionPane.PLAIN_MESSAGE);
+                dispose();
+            }
+        }
         else {
             JOptionPane.showMessageDialog(this,
                     "An error occurred, please try again later",
                     "Sorry", JOptionPane.ERROR_MESSAGE);
         }
-    }
 
+    }
     Manager manager;
-    private Manager addManagerToDb(String email, String password, String firstName, String lastName, String phoneNumber, String adress, String gender, Boolean autoSignIn) {
-
-        return null;
-    }
 
     public boolean isValidNameCharacter(char c) {
         return Character.isLetter(c) || c == ' ' || c == '-' || c == '\'' || Character.isWhitespace(c);
     }
-    public boolean isControlKey(KeyEvent e) {
-        int keyCode = e.getKeyCode();
-        return keyCode == KeyEvent.VK_BACK_SPACE || keyCode == KeyEvent.VK_TAB ||
-                keyCode == KeyEvent.VK_ENTER || keyCode == KeyEvent.VK_DELETE;
-    }
+
     public static void main(String[] args) {
         new SignupGUI(null);
     }

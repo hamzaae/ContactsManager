@@ -21,6 +21,8 @@ public class Manager {
         WOMAN
     }
 
+    public Manager(){}
+
     public Manager(String firstName, String lastName, String phoneNumber, String adress, Genre genre, String email, String password) {
         this.idManager = UUID.randomUUID().toString();
         this.firstName = firstName;
@@ -33,6 +35,7 @@ public class Manager {
         String salt = BCrypt.gensalt();
         this.password = BCrypt.hashpw(password, salt);
     }
+
 
     public String getIdManager() {
         return idManager;
@@ -92,6 +95,7 @@ public class Manager {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        String salt = BCrypt.gensalt();
+        this.password = BCrypt.hashpw(password, salt);
     }
 }

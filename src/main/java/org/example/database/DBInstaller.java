@@ -20,6 +20,10 @@ public class DBInstaller {
             Connection con = DBConnection.getInstance();
 
             String sql = """
+                    DROP TABLE IF EXISTS R;
+                    DROP TABLE IF EXISTS CONTACT;
+                    DROP TABLE IF EXISTS GROUPTABLE;
+                    DROP TABLE IF EXISTS MANAGER;
                     CREATE TABLE MANAGER
                                     (idManager VARCHAR(255),
                                     firstName VARCHAR(50),
@@ -41,9 +45,9 @@ public class DBInstaller {
                                     email_profess VARCHAR(100),
                                     genre VARCHAR(10),
                                     id_Manager VARCHAR(255),
-                                    PRIMARY KEY (id)),
+                                    PRIMARY KEY (id),
                                     FOREIGN KEY (id_Manager) REFERENCES MANAGER(idManager));
-                    CREATE TABLE GROUP
+                    CREATE TABLE GROUPTABLE
                                     (idGroup VARCHAR(255),
                                     nomGroup VARCHAR(255),
                                     PRIMARY KEY (idGroup));
@@ -51,7 +55,7 @@ public class DBInstaller {
                                     (id_Contact VARCHAR(255),
                                     id_Group VARCHAR(255),
                                     FOREIGN KEY (id_Contact) REFERENCES CONTACT(id),
-                                    FOREIGN KEY (id_Group) REFERENCES GROUP(idGroup));
+                                    FOREIGN KEY (id_Group) REFERENCES GROUPTABLE(idGroup));
                     """;
             Statement stmt = con.createStatement();
             stmt.executeUpdate(sql);
@@ -71,6 +75,7 @@ public class DBInstaller {
         return FileManager.fileExists(dataBaseFile);
 
     }
+
 
 
 }

@@ -1,6 +1,8 @@
 package org.example.application;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,6 +57,14 @@ public class HomeGUI extends JDialog{
         //
 
 
+
+        logOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                new LoginGUI(null);
+            }
+        });
 
 
         setVisible(true);
