@@ -19,6 +19,9 @@ public class Main {
                 DBInstaller.createDataBaseTables();
                 LOGGER.info("La base de données est crée correctement");
             }
+            else{
+                System.out.println(11);
+            }
         }catch (Exception ex){
             //Dans le cas d'une erreur dans la création des tables on affiche un message d'erreur
             System.err.println("Erreur lors de la création de la base de données, voir le fichier log.txt pour plus de détails");

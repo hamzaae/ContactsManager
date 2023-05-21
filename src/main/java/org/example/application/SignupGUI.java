@@ -185,6 +185,7 @@ public class SignupGUI extends JDialog{
                         "New manager created successfully!",
                         "Done!", JOptionPane.PLAIN_MESSAGE);
                 dispose();
+                new HomeGUI(null, manager);
             }
         }
         else {

@@ -1,5 +1,9 @@
 package org.example.application;
 
+import org.example.database.DataBaseException;
+import org.example.database.ManagerDao;
+import org.example.models.Manager;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class HomeGUI extends JDialog{
+    private Manager manager;
     private JButton RESETButton;
     private JButton logOutButton;
     private JButton logButton;
@@ -34,9 +39,15 @@ public class HomeGUI extends JDialog{
     private JButton exportButton;
     private JButton importButton;
     private JLabel dateTimeLbl;
+    private JLabel managerName;
+    private JLabel managerEmail;
+    private JLabel managerPhoneNumber;
+    private JLabel managerNbrContacts;
+    private JLabel managerNbrGroups;
 
-    public HomeGUI(JFrame parent){
+    public HomeGUI(JFrame parent, Manager manager) throws DataBaseException {
         super(parent);
+        this.manager = manager;
         setTitle("Contact Manager LOGIN");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -54,8 +65,12 @@ public class HomeGUI extends JDialog{
         updateDateTimeLabel();
         Timer timer = new Timer(1000, e -> updateDateTimeLabel());
         timer.start();
-        //
-
+        // Set the manager info
+        managerName.setText(manager.getFirstName()+" "+manager.getLastName());
+        managerPhoneNumber.setText(manager.getPhoneNumber());
+        managerEmail.setText(manager.getEmail());
+        managerNbrContacts.setText(String.valueOf(ManagerDao.countContacts(manager)));
+        managerNbrGroups.setText(String.valueOf(ManagerDao.countContacts(manager)));
 
 
         logOutButton.addActionListener(new ActionListener() {
@@ -76,7 +91,7 @@ public class HomeGUI extends JDialog{
         dateTimeLbl.setText(formattedDateTime);
     }
 
-    public static void main(String[] args) {
-        new  HomeGUI(null);
+    public static void main(String[] args) throws DataBaseException {
+        new  HomeGUI(null, null);
     }
 }

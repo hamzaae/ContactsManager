@@ -44,6 +44,7 @@ public class LoginGUI extends JDialog{
             public void actionPerformed(ActionEvent e) {
                 String email = txtUsername.getText();
                 String password = String.valueOf(txtPswrd.getPassword());
+                System.out.println(email+" "+password);
                 if (email.equals("") || password.equals("")){
                     JOptionPane.showMessageDialog(LoginGUI.this,
                             "Username or password are empty!",
@@ -55,9 +56,12 @@ public class LoginGUI extends JDialog{
                     if (currentManager != null){
                         System.out.println(currentManager.getLastName());
                         dispose();
+                        new HomeGUI(null, currentManager);
                     }
                     else {
-                        System.out.println("error no user");
+                        JOptionPane.showMessageDialog(LoginGUI.this,
+                                "Username or password are not correct!",
+                                "Retry", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (DataBaseException ex) {
                     throw new RuntimeException(ex);

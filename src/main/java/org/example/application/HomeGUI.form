@@ -50,7 +50,7 @@
               <text value=""/>
             </properties>
           </component>
-          <component id="728a1" class="javax.swing.JLabel">
+          <component id="728a1" class="javax.swing.JLabel" binding="managerName">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -58,7 +58,7 @@
               <text value="Last and first name"/>
             </properties>
           </component>
-          <component id="e56ae" class="javax.swing.JLabel">
+          <component id="e56ae" class="javax.swing.JLabel" binding="managerEmail">
             <constraints>
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -66,7 +66,7 @@
               <text value="emailmanager@gmail.com"/>
             </properties>
           </component>
-          <component id="58492" class="javax.swing.JLabel">
+          <component id="58492" class="javax.swing.JLabel" binding="managerPhoneNumber">
             <constraints>
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -121,7 +121,7 @@
               <text value="number of groups"/>
             </properties>
           </component>
-          <component id="74d93" class="javax.swing.JLabel">
+          <component id="74d93" class="javax.swing.JLabel" binding="managerNbrContacts">
             <constraints>
               <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -129,7 +129,7 @@
               <text value="0"/>
             </properties>
           </component>
-          <component id="cab73" class="javax.swing.JLabel">
+          <component id="cab73" class="javax.swing.JLabel" binding="managerNbrGroups">
             <constraints>
               <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>

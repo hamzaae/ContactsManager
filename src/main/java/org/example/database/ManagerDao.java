@@ -14,10 +14,8 @@ public class ManagerDao {
 
         try {
             Connection c = DBConnection.getInstance();
-            PreparedStatement stm = c.prepareStatement("SELECT * from manager where email=? and password=?");
+            PreparedStatement stm = c.prepareStatement("SELECT * from manager where email=?");
             stm.setString(1, pEmail);
-            String salt = BCrypt.gensalt();
-            stm.setString(2, BCrypt.hashpw(pPassword, salt));
             ResultSet rs = stm.executeQuery();
             if (!rs.next()) {
                 // No data found
@@ -25,9 +23,21 @@ public class ManagerDao {
                 return currentManager;
             } else {
                 // Data found
-                currentManager = resultToManager(rs);
-                rs.close();
-                return currentManager;
+                String storedHashedPassword = rs.getString("password");
+
+                // Check if the entered password matches the stored hashed password
+                boolean passwordMatches = BCrypt.checkpw(pPassword, storedHashedPassword);
+
+                if (passwordMatches) {
+                    // Password is correct
+                    currentManager = resultToManager(rs);
+                    rs.close();
+                    return currentManager;
+                } else {
+                    // Password is incorrect
+                    rs.close();
+                    return currentManager;
+                }
             }
         } catch (SQLException ex) {
             //tracer l'erreur
@@ -84,6 +94,61 @@ public class ManagerDao {
             throw new DataBaseException(ex);
         }
         return manager;
+    }
+
+    public static int countContacts(Manager manager) throws DataBaseException {
+        try {
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+
+            String sqlInsert = "SELECT count(*) as cc from contact where id_manager=?";
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            //définir la valeur du paramètre de l'instruction SQL
+            stm.setString(1, manager.getIdManager());
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                int contactCount = rs.getInt("cc");
+                rs.close();
+                return contactCount;
+            } else {
+                // No data found
+                rs.close();
+                return 0;
+            }
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+    public static int countGroups(Manager manager) throws DataBaseException {
+        try {
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+
+            String sqlInsert = "";// TODO: sql statement for groups count for a user
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            //définir la valeur du paramètre de l'instruction SQL
+            stm.setString(1, manager.getIdManager());
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                int contactCount = rs.getInt("cc");
+                rs.close();
+                return contactCount;
+            } else {
+                // No data found
+                rs.close();
+                return 0;
+            }
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
     }
 
     private static Manager resultToManager(ResultSet rs) throws SQLException {
