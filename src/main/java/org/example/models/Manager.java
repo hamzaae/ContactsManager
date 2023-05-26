@@ -14,7 +14,7 @@ public class Manager {
     private Genre genre;
     private String email;
     private String password;
-    private List<Contact> contacts = new ArrayList<Contact>();
+    private boolean keepMe;
 
     public enum Genre {
         MAN,
@@ -22,6 +22,18 @@ public class Manager {
     }
 
     public Manager(){}
+
+    public Manager(String idManager, String firstName, String lastName, String phoneNumber, String adress, Genre genre, String email, String password, boolean keepMe) {
+        this.idManager = idManager;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.adress = adress;
+        this.genre = genre;
+        this.email = email;
+        this.password = password;
+        this.keepMe = keepMe;
+    }
 
     public Manager(String firstName, String lastName, String phoneNumber, String adress, Genre genre, String email, String password) {
         this.idManager = UUID.randomUUID().toString();

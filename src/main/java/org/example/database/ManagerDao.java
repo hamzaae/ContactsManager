@@ -10,7 +10,7 @@ public class ManagerDao {
     private static Logger logger = Logger.getLogger(ManagerDao.class);
     private static Manager currentManager;
 
-    public static Manager login(String pEmail, String pPassword) throws  DataBaseException{
+    public static Manager login(String pEmail, String pPassword, boolean pkeepMe) throws  DataBaseException{
 
         try {
             Connection c = DBConnection.getInstance();
@@ -30,7 +30,12 @@ public class ManagerDao {
 
                 if (passwordMatches) {
                     // Password is correct
-                    currentManager = resultToManager(rs);
+                    currentManager = resultToManager2(rs);
+
+                    //
+                    stm = c.prepareStatement("UPDATE manager set keepme = TRUE where email=?");
+                    stm.setString(1, pEmail);
+                    stm.executeUpdate();
                     rs.close();
                     return currentManager;
                 } else {
@@ -46,6 +51,45 @@ public class ManagerDao {
             throw new DataBaseException(ex);
         }
     }
+    public static Manager login() throws  DataBaseException{
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from manager where keepme=TRUE");
+            ResultSet rs = stm.executeQuery();
+            if (!rs.next()) {
+                // No data found
+                rs.close();
+                return null;
+            } else {
+                // Data found
+                currentManager = resultToManager2(rs);
+                return currentManager;
+            }
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
+    public static void logout(String pEmail) throws  DataBaseException{
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("UPDATE manager set keepme = FALSE where email=?");
+            stm.setString(1, pEmail);
+            stm.executeUpdate();
+
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
+
 
     public static Manager signup(Manager pManager) throws DataBaseException{
         Manager manager = null;
@@ -62,6 +106,7 @@ public class ManagerDao {
             ResultSet rs = stm.executeQuery();
             if (rs.next()){
                 manager = new Manager();
+                System.out.println(manager);
                 return manager;
             }
 
@@ -156,5 +201,12 @@ public class ManagerDao {
                 rs.getString("phoneNumber"), rs.getString("adress"),
                 Manager.Genre.valueOf(rs.getString("genre")), rs.getString("email"),
                 rs.getString("password"));
+    }
+
+    private static Manager resultToManager2(ResultSet rs) throws SQLException {
+        return new Manager(rs.getString("idManager"), rs.getString("firstName"), rs.getString("lastName"),
+                rs.getString("phoneNumber"), rs.getString("adress"),
+                Manager.Genre.valueOf(rs.getString("genre")), rs.getString("email"),
+                rs.getString("password"), rs.getBoolean("keepMe"));
     }
 }

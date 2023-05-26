@@ -14,15 +14,17 @@ public class Contact {
     private String email_perso;
     private String email_profess;
     private Genre genre;
-    private Manager manager;
-    private List<Group> groups = new ArrayList<Group>();
+    private String managerId;
+    private String groupId;
+
+
 
     public enum Genre {
-        MALE,
-        FEMALE
+        MAN,
+        WOMAN
     }
 
-    public Contact(String nom, String prenom, String tel1, String tel2, String adresse, String email_perso, String email_profess, Genre genre, Manager manager) {
+    public Contact(String nom, String prenom, String tel1, String tel2, String adresse, String email_perso, String email_profess, Genre genre, String managerId, String groupId) {
         this.id = UUID.randomUUID().toString();
         this.nom = nom;
         this.prenom = prenom;
@@ -32,7 +34,16 @@ public class Contact {
         this.email_perso = email_perso;
         this.email_profess = email_profess;
         this.genre = genre;
-        this.manager = manager;
+        this.managerId = managerId;
+        this.groupId = groupId;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     public String getId() {
@@ -100,12 +111,12 @@ public class Contact {
     }
 
     public void setGenre(char genre) {
-        if (genre=='m') {this.genre = Genre.MALE;}
-        else {this.genre = Genre.FEMALE;}
+        if (genre=='m') {this.genre = Genre.MAN;}
+        else {this.genre = Genre.WOMAN;}
     }
 
     public String getManagerId(){
-        return this.manager.getIdManager();
+        return this.managerId;
     }
 
     @Override

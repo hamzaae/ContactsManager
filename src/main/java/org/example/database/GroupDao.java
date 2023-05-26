@@ -1,4 +1,72 @@
 package org.example.database;
 
+import org.apache.log4j.Logger;
+import org.example.models.Contact;
+import org.example.models.Group;
+import org.example.models.Manager;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class GroupDao {
+    private static Logger logger = Logger.getLogger(ContactDao.class);
+
+    public static String rechercherGroupParNom0(String pNom) throws  DataBaseException{
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from grouptable where upper(nomgroup)=?");
+            stm.setString(1, pNom.toUpperCase());
+            ResultSet rs = stm.executeQuery();
+            if (!rs.next()){
+                Group newGroup = new Group(pNom);
+                stm = c.prepareStatement("INSERT INTO grouptable VALUES (?,upper(?))");
+                stm.setString(1, newGroup.getIdGroup());
+                stm.setString(2, pNom.toUpperCase());
+                stm.execute();
+                rs.close();
+                return newGroup.getIdGroup();
+            }
+
+            rs.close();
+            return rs.getString("idgroup");
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+
+    }
+
+    public static String addGroup(String  pNom) throws DataBaseException{
+        try {
+            Group newGroup = new Group(pNom);
+
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+            String sqlInsert = "INSERT INTO grouptable VALUES (?,upper(?))";
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            //définir la valeur du paramètre de l'instruction SQL
+            stm.setString(1, newGroup.getIdGroup());
+            stm.setString(2, pNom);
+            stm.execute();
+            return newGroup.getIdGroup();
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+
+    }
+    private static Contact resultToContact(ResultSet rs) throws SQLException {
+        return new Contact(rs.getString("id"), rs.getString("nom"), rs.getString("tel1"),
+                rs.getString("tel2"), rs.getString("adresse"), rs.getString("email_perso"),
+                rs.getString("email_profess"), Contact.Genre.valueOf(rs.getString("genre")),
+                rs.getString("id_manager"), rs.getString("group_id"));
+    }
+
 }

@@ -20,58 +20,74 @@ public class LoginGUI extends JDialog{
     private JPanel loginPanel;
     private Manager currentManager = null;
 
-    public LoginGUI(JFrame parent){
+    public LoginGUI(JFrame parent) throws DataBaseException {
         super(parent);
-        setTitle("Contact Manager LOGIN");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setResizable(false);
-        setContentPane(loginPanel);
-        setModal(true);
-        setLocationRelativeTo(parent);
-        setSize(360, 380);
+        Manager currentManager0 = ManagerDao.login();
+        if (currentManager0 != null){
+            dispose();
+            new HomeGUI(null, currentManager0);
 
-
-        // Load the image as a resource relative to the class
-        URL imageUrl = getClass().getResource("/media/logo.png");
-        if (imageUrl != null) {
-            ImageIcon image = new ImageIcon(imageUrl);
-            this.setIconImage(image.getImage());
         }
+        else {
 
 
-        signInButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String email = txtUsername.getText();
-                String password = String.valueOf(txtPswrd.getPassword());
-                System.out.println(email+" "+password);
-                if (email.equals("") || password.equals("")){
-                    JOptionPane.showMessageDialog(LoginGUI.this,
-                            "Username or password are empty!",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                try {
-                    currentManager = ManagerDao.login(email,password);
-                    if (currentManager != null){
-                        System.out.println(currentManager.getLastName());
-                        dispose();
-                        new HomeGUI(null, currentManager);
-                    }
-                    else {
-                        JOptionPane.showMessageDialog(LoginGUI.this,
-                                "Username or password are not correct!",
-                                "Retry", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (DataBaseException ex) {
-                    throw new RuntimeException(ex);
-                }
+            setTitle("Contact Manager LOGIN");
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            setResizable(false);
+            setContentPane(loginPanel);
+            setModal(true);
+            setLocationRelativeTo(parent);
+            setSize(360, 380);
+
+
+            // Load the image as a resource relative to the class
+            URL imageUrl = getClass().getResource("/media/logo.png");
+            if (imageUrl != null) {
+                ImageIcon image = new ImageIcon(imageUrl);
+                this.setIconImage(image.getImage());
             }
-        });
 
 
+            signInButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String email = txtUsername.getText();
+                    String password = String.valueOf(txtPswrd.getPassword());
+                    boolean keepMe = keepMeSignedInCheckBox.isSelected();
 
-        setVisible(true);
+                    if (email.equals("") || password.equals("")) {
+                        JOptionPane.showMessageDialog(LoginGUI.this,
+                                "Username or password are empty!",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    try {
+                        currentManager = ManagerDao.login(email, password, keepMe);
+                        if (currentManager != null) {
+                            dispose();
+                            new HomeGUI(null, currentManager);
+                        } else {
+                            JOptionPane.showMessageDialog(LoginGUI.this,
+                                    "Username or password are not correct!",
+                                    "Retry", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (DataBaseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            });
+
+            signUpButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    new SignupGUI(null);
+                }
+            });
+
+
+            setVisible(true);
+        }
     }
 
 /*
@@ -83,7 +99,5 @@ public class LoginGUI extends JDialog{
 */
 
 
-    public static void main(String[] args) {
-        new LoginGUI(null);
-    }
+
 }

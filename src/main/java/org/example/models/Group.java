@@ -2,16 +2,21 @@ package org.example.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Group {
     private String idGroup;
     private String nomGroup;
-    private List<Contact> contacts = new ArrayList<Contact>();
 
-    public Group(String idGroup, String nomGroup, List<Contact> contacts) {
-        this.idGroup = idGroup;
+
+    public Group(String nomGroup) {
+        this.idGroup = UUID.randomUUID().toString();;
         this.nomGroup = nomGroup;
-        this.contacts = contacts;
+
+    }
+
+    public Group() {
+
     }
 
     public String getIdGroup() {
@@ -30,11 +35,4 @@ public class Group {
         this.nomGroup = nomGroup;
     }
 
-    public List<Contact> getContacts() {
-        return contacts;
-    }
-
-    public void setContacts(List<Contact> contacts) {
-        this.contacts = contacts;
-    }
 }
