@@ -8,9 +8,9 @@ import java.sql.*;
 
 public class ManagerDao {
     private static Logger logger = Logger.getLogger(ManagerDao.class);
-    private static Manager currentManager;
+    private static Manager currentManager = null;
 
-    public static Manager login(String pEmail, String pPassword, boolean pkeepMe) throws  DataBaseException{
+    public static Manager login(String pEmail, String pPassword, boolean keepMe) throws  DataBaseException{
 
         try {
             Connection c = DBConnection.getInstance();
@@ -20,7 +20,7 @@ public class ManagerDao {
             if (!rs.next()) {
                 // No data found
                 rs.close();
-                return currentManager;
+                return null;
             } else {
                 // Data found
                 String storedHashedPassword = rs.getString("password");
@@ -33,15 +33,17 @@ public class ManagerDao {
                     currentManager = resultToManager2(rs);
 
                     //
-                    stm = c.prepareStatement("UPDATE manager set keepme = TRUE where email=?");
-                    stm.setString(1, pEmail);
-                    stm.executeUpdate();
-                    rs.close();
+                    if (keepMe){
+                        stm = c.prepareStatement("UPDATE manager set keepme = TRUE where email=?");
+                        stm.setString(1, pEmail);
+                        stm.executeUpdate();
+                        rs.close();
+                    }
                     return currentManager;
                 } else {
                     // Password is incorrect
                     rs.close();
-                    return currentManager;
+                    return null;
                 }
             }
         } catch (SQLException ex) {
@@ -88,8 +90,6 @@ public class ManagerDao {
             throw new DataBaseException(ex);
         }
     }
-
-
 
     public static Manager signup(Manager pManager) throws DataBaseException{
         Manager manager = null;

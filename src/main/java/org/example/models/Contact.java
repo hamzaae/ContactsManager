@@ -38,6 +38,20 @@ public class Contact {
         this.groupId = groupId;
     }
 
+    public Contact(String id, String nom, String prenom, String tel1, String tel2, String adresse, String email_perso, String email_profess, Genre genre, String managerId, String groupId) {
+        this.id = id;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.tel1 = tel1;
+        this.tel2 = tel2;
+        this.adresse = adresse;
+        this.email_perso = email_perso;
+        this.email_profess = email_profess;
+        this.genre = genre;
+        this.managerId = managerId;
+        this.groupId = groupId;
+    }
+
     public String getGroupId() {
         return groupId;
     }

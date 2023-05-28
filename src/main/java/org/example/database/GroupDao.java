@@ -28,9 +28,9 @@ public class GroupDao {
                 rs.close();
                 return newGroup.getIdGroup();
             }
-
+            String result = rs.getString("idgroup");
             rs.close();
-            return rs.getString("idgroup");
+            return result;
         } catch (SQLException ex) {
             //tracer l'erreur
             logger.error("Erreur à cause de : ", ex);
@@ -39,6 +39,54 @@ public class GroupDao {
         }
 
     }
+    public static String rechercherGroupParId(String pid) throws DataBaseException {
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * FROM grouptable WHERE idgroup = ?");
+            stm.setString(1, pid);
+            ResultSet rs = stm.executeQuery();
+
+            if (rs.next()) {
+                String group = rs.getString("nomgroup");
+                rs.close();
+                return group;
+            } else {
+                rs.close();
+                throw new DataBaseException("No data found for the specified ID");
+            }
+        } catch (SQLException ex) {
+            // tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            // remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
+    public static ArrayList<String> getAllGroups() throws DataBaseException {
+        ArrayList<String> list = new ArrayList<String>();
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from grouptable");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                list.add(rs.getString("nomgroup"));
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list;
+    }
+
+
+
 
     public static String addGroup(String  pNom) throws DataBaseException{
         try {
