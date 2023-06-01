@@ -53,6 +53,7 @@ public class ManagerDao {
             throw new DataBaseException(ex);
         }
     }
+
     public static Manager login() throws  DataBaseException{
         try {
             Connection c = DBConnection.getInstance();
@@ -141,6 +142,30 @@ public class ManagerDao {
         return manager;
     }
 
+    public static boolean changePassword(String pswrd, String id) throws DataBaseException{
+        try {
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+            //instruction SQl avec un paramètre
+            String sqlInsert = "UPDATE manager SET password=? where idManager=?";
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            //définir la valeur du paramètre de l'instruction SQL
+            String salt = BCrypt.gensalt();
+            pswrd = BCrypt.hashpw(pswrd, salt);
+            stm.setString(1, pswrd);
+            stm.setString(2, id);
+            //Executer l'instruction SQL
+
+            return stm.executeUpdate()>0;
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
     public static int countContacts(Manager manager) throws DataBaseException {
         try {
             //Récupérer la connexion à la base de données
@@ -168,6 +193,8 @@ public class ManagerDao {
             throw new DataBaseException(ex);
         }
     }
+
+
     public static int countGroups(Manager manager) throws DataBaseException {
         try {
             //Récupérer la connexion à la base de données

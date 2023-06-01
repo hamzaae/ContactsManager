@@ -65,38 +65,13 @@ public class ContactDao {
         }
     }
 
-    public static boolean changePassword(String pswrd, String id) throws DataBaseException{
-        try {
-            //Récupérer la connexion à la base de données
-            Connection c = DBConnection.getInstance();
-            //instruction SQl avec un paramètre
-            String sqlInsert = "UPDATE contact SET nom=? where id=?";
-            //créer l'objet PreparedStatement
-            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
-            //définir la valeur du paramètre de l'instruction SQL
-            String salt = BCrypt.gensalt();
-            pswrd = BCrypt.hashpw(pswrd, salt);
-            stm.setString(1, pswrd);
-            stm.setString(2, id);
-            //Executer l'instruction SQL
-
-            boolean hasResultSet = stm.execute();
-            return hasResultSet;
-        } catch (SQLException ex) {
-            //tracer l'erreur
-            logger.error("Erreur à cause de : ", ex);
-            //remonter l'erreur
-            throw new DataBaseException(ex);
-        }
-    }
-
-    public Contact rechercherContactParNom(String pNom) throws  DataBaseException{
-        List<Contact> list = new ArrayList<>();
+    public static ArrayList<Contact> searchByName(String searchFor) throws DataBaseException{
+        ArrayList<Contact> list = new ArrayList<>();
 
         try {
             Connection c = DBConnection.getInstance();
             PreparedStatement stm = c.prepareStatement("SELECT * from contact where upper(nom)=?");
-            stm.setString(1, pNom.toUpperCase());
+            stm.setString(1, searchFor.toUpperCase());
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 list.add(resultToContact(rs));
@@ -111,7 +86,64 @@ public class ContactDao {
         if (list.isEmpty()) {
             return null;
         }
-        return list.get(0);
+        return list;
+    }
+
+    public static ArrayList<Contact> searchByNumber(String searchFor) throws DataBaseException{
+        ArrayList<Contact> list = new ArrayList<>();
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from contact where tel1=? or tel2=?");
+            stm.setString(1, searchFor);
+            stm.setString(2, searchFor);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                list.add(resultToContact(rs));
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list;
+    }
+
+    public static ArrayList<Contact> searchByGroup(String searchFor) throws DataBaseException{
+        ArrayList<Contact> list = new ArrayList<>();
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from grouptable where upper(nomgroup)=?");
+            stm.setString(1, searchFor);
+            ResultSet rs = stm.executeQuery();
+            String idGroup = null;
+            idGroup = rs.getString("idgroup");
+            if (idGroup != null) {
+                stm = c.prepareStatement("SELECT * from contact where group_id=?");
+                stm.setString(1, idGroup);
+                rs = stm.executeQuery();
+                while (rs.next()) {
+                    list.add(resultToContact(rs));
+
+                }
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list;
     }
 
     public static ArrayList<Contact> getAllContacts(String pmanager) throws  DataBaseException{
@@ -178,12 +210,56 @@ public class ContactDao {
         return contact;
     }
 
+    public static ArrayList<Contact> getAllContactsSorted(String idManager) throws DataBaseException {
+        ArrayList<Contact> list = new ArrayList<Contact>();
+
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * from contact where id_manager=? ORDER BY nom, prenom");
+            stm.setString(1, idManager);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                list.add(resultToContact(rs));
+            }
+            rs.close();
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list;
+    }
+
+    public static void makeGroupNone(String idGroup) throws DataBaseException {
+        try {
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+            //instruction SQl avec un paramètre
+            String sqlInsert = "UPDATE contact SET group_id='0' WHERE group_id=?";
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            //définir la valeur du paramètre de l'instruction SQL
+            stm.setString(1, idGroup);
+
+            //Executer l'instruction SQL
+            stm.execute();
+
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
     private static Contact resultToContact(ResultSet rs) throws SQLException {
         return new Contact(rs.getString("id"), rs.getString("nom"), rs.getString("prenom"), rs.getString("tel1"),
                 rs.getString("tel2"), rs.getString("adresse"), rs.getString("email_perso"),
                 rs.getString("email_profess"), Contact.Genre.valueOf(rs.getString("genre")),
                 rs.getString("id_manager"), rs.getString("group_id"));
     }
-
-
 }

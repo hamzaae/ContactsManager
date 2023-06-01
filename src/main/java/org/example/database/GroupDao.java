@@ -39,6 +39,7 @@ public class GroupDao {
         }
 
     }
+
     public static String rechercherGroupParId(String pid) throws DataBaseException {
         try {
             Connection c = DBConnection.getInstance();
@@ -53,6 +54,29 @@ public class GroupDao {
             } else {
                 rs.close();
                 throw new DataBaseException("No data found for the specified ID");
+            }
+        } catch (SQLException ex) {
+            // tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            // remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
+    public static String rechercherGroupParNom(String pnom) throws DataBaseException {
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT * FROM grouptable WHERE nomgroup = ?");
+            stm.setString(1, pnom);
+            ResultSet rs = stm.executeQuery();
+
+            if (rs.next()) {
+                String group = rs.getString("idgroup");
+                rs.close();
+                return group;
+            } else {
+                rs.close();
+                throw new DataBaseException("No data found for the specified Name");
             }
         } catch (SQLException ex) {
             // tracer l'erreur
@@ -85,8 +109,27 @@ public class GroupDao {
         return list;
     }
 
+    public static int getAllGroupsCount() throws DataBaseException {
 
+        try {
+            Connection c = DBConnection.getInstance();
+            PreparedStatement stm = c.prepareStatement("SELECT COUNT(*) as co from grouptable");
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                int rowCount = rs.getInt("co");
+                rs.close();
+                return rowCount-3;
+            }
 
+            rs.close();
+            return 0; // Return 0 if no rows found
+        } catch (SQLException ex) {
+            // Log and throw a custom exception
+            logger.error("Error occurred: ", ex);
+            throw new DataBaseException(ex);
+        }
+
+    }
 
     public static String addGroup(String  pNom) throws DataBaseException{
         try {
@@ -110,11 +153,32 @@ public class GroupDao {
         }
 
     }
+
+    public static void deleteGroup(String idGroup) throws DataBaseException {
+        try {
+            //Récupérer la connexion à la base de données
+            Connection c = DBConnection.getInstance();
+            //instruction SQl avec un paramètre
+            String sqlInsert = "DELETE FROM grouptable WHERE idgroup = ?";
+            //créer l'objet PreparedStatement
+            PreparedStatement stm = c.prepareStatement(sqlInsert);
+            //définir la valeur du paramètre de l'instruction SQL
+            stm.setString(1, idGroup);
+
+            stm.executeUpdate();
+
+        } catch (SQLException ex) {
+            //tracer l'erreur
+            logger.error("Erreur à cause de : ", ex);
+            //remonter l'erreur
+            throw new DataBaseException(ex);
+        }
+    }
+
     private static Contact resultToContact(ResultSet rs) throws SQLException {
         return new Contact(rs.getString("id"), rs.getString("nom"), rs.getString("tel1"),
                 rs.getString("tel2"), rs.getString("adresse"), rs.getString("email_perso"),
                 rs.getString("email_profess"), Contact.Genre.valueOf(rs.getString("genre")),
                 rs.getString("id_manager"), rs.getString("group_id"));
     }
-
 }

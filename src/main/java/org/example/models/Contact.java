@@ -52,6 +52,11 @@ public class Contact {
         this.groupId = groupId;
     }
 
+    public Contact() {
+        this.id = UUID.randomUUID().toString();
+
+    }
+
     public String getGroupId() {
         return groupId;
     }
@@ -124,9 +129,13 @@ public class Contact {
         return genre;
     }
 
-    public void setGenre(char genre) {
-        if (genre=='m') {this.genre = Genre.MAN;}
-        else {this.genre = Genre.WOMAN;}
+    public void setGenre(String genre) {
+        if (genre.equals("MAN")){
+            this.genre = Genre.MAN;
+        }
+        else {
+            this.genre = Genre.WOMAN;
+        }
     }
 
     public String getManagerId(){

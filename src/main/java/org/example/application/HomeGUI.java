@@ -1,12 +1,12 @@
 package org.example.application;
 
-import org.example.MainRun;
 import org.example.database.ContactDao;
 import org.example.database.DataBaseException;
 import org.example.database.GroupDao;
 import org.example.database.ManagerDao;
 import org.example.models.Contact;
 import org.example.models.Manager;
+import org.example.utils.ExcelExporter;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -16,6 +16,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class HomeGUI extends JDialog{
     private String selectedContactId;
     private JButton RESETButton;
     private JButton logOutButton;
-    private JButton logButton;
+    private JButton groupsButton;
     private JButton editButton;
     private JPanel homePanel;
     private JTable tableContacts;
@@ -55,6 +56,7 @@ public class HomeGUI extends JDialog{
     private JLabel managerPhoneNumber;
     private JLabel managerNbrContacts;
     private JLabel managerNbrGroups;
+    private JButton sortButton;
     private DefaultTableModel tableModel = new DefaultTableModel();
 
     public HomeGUI(JFrame parent, Manager manager) throws DataBaseException {
@@ -66,7 +68,7 @@ public class HomeGUI extends JDialog{
         setContentPane(homePanel);
         setModal(true);
         setLocationRelativeTo(parent);
-        setSize(700, 500);
+        setSize(750, 500);
         // Load the image as a resource relative to the class
         URL imageUrl = getClass().getResource("/media/logo.png");
         if (imageUrl != null) {
@@ -82,7 +84,7 @@ public class HomeGUI extends JDialog{
         managerPhoneNumber.setText(manager.getPhoneNumber());
         managerEmail.setText(manager.getEmail());
         managerNbrContacts.setText(String.valueOf(ManagerDao.countContacts(manager)));
-        managerNbrGroups.setText(String.valueOf(ManagerDao.countContacts(manager)));
+        managerNbrGroups.setText(String.valueOf(GroupDao.getAllGroupsCount()));
 
         //
         showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
@@ -139,7 +141,6 @@ public class HomeGUI extends JDialog{
             }
         });
 
-        // Add selection listener to tableContacts
         tableContacts.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -203,6 +204,140 @@ public class HomeGUI extends JDialog{
             }
         });
 
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String searchBy = String.valueOf(comboBoxSearchBy.getSelectedItem());
+                String searchFor = inputSearchBy.getText();
+                try {
+                    if (searchFor.equals("")) {
+                        showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
+                    } else {
+                        if(searchBy.equals("Name")){
+                            showAllContacts(ContactDao.searchByName(searchFor));
+                        } else if (searchBy.equals("Number")) {
+                            System.out.println("Number");
+                            showAllContacts(ContactDao.searchByNumber(searchFor));
+                        } else {
+                            showAllContacts(ContactDao.searchByGroup(searchFor));
+                        }
+
+                    }
+                } catch (DataBaseException ex) {
+                throw new RuntimeException(ex);
+            }
+            }
+        });
+
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               comboBoxSearchBy.setSelectedIndex(0);
+               inputSearchBy.setText("");
+                try {
+                    showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
+                } catch (DataBaseException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        exportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Création d'un fichier excel
+                String[] header = new String[]{"nom","prenom","Tel1","Tel2","Email1","Email2","Adresse","Genre","Groupe"};
+                ArrayList<String[]> data = new ArrayList<>();
+                try {
+                    ArrayList<Contact> contacts =  ContactDao.getAllContacts(manager.getIdManager());
+                    assert contacts != null: "No contacts to export";
+                    for (Contact contact:contacts){
+                        String[] row = new String[]{contact.getNom(),contact.getPrenom(),contact.getTel1(),contact.getTel2(),contact.getEmail_perso(),contact.getEmail_profess(),contact.getAdresse(),contact.getGenre().toString(),GroupDao.rechercherGroupParId(contact.getGroupId())};
+                        data.add(row);
+                    }
+                    ExcelExporter ex = new ExcelExporter(header, data, "Contacts");
+                    ex.export("ContactsManager.xlsx");
+                } catch (DataBaseException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IOException exc) {
+                    throw new RuntimeException(exc);
+                }
+            }
+        });
+
+        importButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //String[] header = new String[]{"nom","prenom","Tel1","Tel2","Email1","Email2","Adresse","Genre","Groupe"};
+                try {
+                    ExcelExporter ex = new ExcelExporter("Contacts");
+                    java.util.List<ArrayList<Object>> data = ex.readFromExcel("ContactsManager.xlsx", 0);
+                    boolean isFirstRow = true;
+                    for (ArrayList<Object> datum : data) {
+                        if (isFirstRow) {
+                            isFirstRow = false;
+                            continue;
+                        }
+                        Contact contact = new Contact();
+                        contact.setNom(String.valueOf(datum.get(0)));
+                        contact.setPrenom(String.valueOf(datum.get(1)));
+                        contact.setTel1(String.valueOf(datum.get(2)));
+                        contact.setTel2(String.valueOf(datum.get(3)));
+                        contact.setEmail_perso(String.valueOf(datum.get(4)));
+                        contact.setEmail_profess(String.valueOf(datum.get(5)));
+                        contact.setAdresse(String.valueOf(datum.get(6)));
+                        contact.setGenre(String.valueOf(datum.get(7)));
+                        contact.setGroupId(GroupDao.rechercherGroupParNom0(String.valueOf(datum.get(8))));
+                        ContactDao.create(contact, manager.getIdManager());
+                    }
+                    showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
+
+                } catch (DataBaseException | IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+        });
+
+        sortButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    showAllContacts(ContactDao.getAllContactsSorted(manager.getIdManager()));
+                } catch (DataBaseException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        groupsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String group = String.valueOf(comboBoxGroup.getSelectedItem());
+                String groupItem = group;
+                if (group.equals("NONE") || group.equals("AUTO") || group.equals("NEW")) {
+                    group = "0";
+                }
+                if (!group.equals("0")) {
+                    try {
+                        group = GroupDao.rechercherGroupParNom(group);
+                        ContactDao.makeGroupNone(group);
+                        GroupDao.deleteGroup(group);
+                        showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
+                        comboBoxGroup.removeItem(groupItem);
+                        managerNbrGroups.setText(String.valueOf(GroupDao.getAllGroupsCount()));
+                    } catch (DataBaseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(null,
+                            "Cannot delete this Group!",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        });
+
         setVisible(true);
     }
 
@@ -250,32 +385,33 @@ public class HomeGUI extends JDialog{
         tableModel.addColumn("GroupId");
         tableModel.addColumn("ContactId");
 
-
-        // Add the contacts to the table model
-        for (Contact contact : contacts) {
-            Object[] rowData = new Object[10];
-            rowData[0] = contact.getNom();
-            rowData[1] = contact.getPrenom();
-            rowData[2] = contact.getTel1();
-            rowData[3] = contact.getTel2();
-            rowData[4] = contact.getEmail_perso();
-            rowData[5] = contact.getEmail_profess();
-            rowData[6] = contact.getAdresse();
-            rowData[7] = contact.getGenre();
-            try {
-                rowData[8] = GroupDao.rechercherGroupParId(contact.getGroupId());
-            } catch (DataBaseException e) {
-                throw new RuntimeException(e);
+        if(contacts != null) {
+            // Add the contacts to the table model
+            for (Contact contact : contacts) {
+                Object[] rowData = new Object[10];
+                rowData[0] = contact.getNom();
+                rowData[1] = contact.getPrenom();
+                rowData[2] = contact.getTel1();
+                rowData[3] = contact.getTel2();
+                rowData[4] = contact.getEmail_perso();
+                rowData[5] = contact.getEmail_profess();
+                rowData[6] = contact.getAdresse();
+                rowData[7] = contact.getGenre();
+                try {
+                    rowData[8] = GroupDao.rechercherGroupParId(contact.getGroupId());
+                } catch (DataBaseException e) {
+                    throw new RuntimeException(e);
+                }
+                rowData[9] = contact.getId();
+                tableModel.addRow(rowData);
             }
-            rowData[9] = contact.getId();
-            tableModel.addRow(rowData);
+            // Hide the ID column
+            TableColumn column = tableContacts.getColumnModel().getColumn(9);
+            column.setMinWidth(0);
+            column.setMaxWidth(0);
+            column.setWidth(0);
+            column.setPreferredWidth(0);
         }
-        // Hide the ID column
-        TableColumn column = tableContacts.getColumnModel().getColumn(9);
-        column.setMinWidth(0);
-        column.setMaxWidth(0);
-        column.setWidth(0);
-        column.setPreferredWidth(0);
     }
 
     public Manager getManager() {
@@ -456,27 +592,30 @@ public class HomeGUI extends JDialog{
         panel.add(new JLabel("Confirm password:"));
         panel.add(confirmpswrdField);
 
-        int option = JOptionPane.showOptionDialog(null, panel, "Change password",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+        // Use JOptionPane.showMessageDialog instead of JOptionPane.showOptionDialog
+        JOptionPane.showMessageDialog(null, panel, "Change password", JOptionPane.PLAIN_MESSAGE);
 
-        if (option == JOptionPane.OK_OPTION) {
-            String pswrd = pswrdField.getText();
-            String confirmpswrd = confirmpswrdField.getText();
-            if (!pswrd.equals(confirmpswrd)){
-                JOptionPane.showMessageDialog(null, "Password and confirm password mismatch");
-            }
-            else{
-                try {
-                    if(ContactDao.changePassword(pswrd,manager.getIdManager())){
-                        JOptionPane.showMessageDialog(null, "Password updated successfully");
-                    }
-                } catch (DataBaseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        String pswrd = pswrdField.getText();
+        String confirmpswrd = confirmpswrdField.getText();
+        while(!pswrd.equals(confirmpswrd)){
+            JOptionPane.showMessageDialog(panel, "Password and confirm password mismatch");
+            JOptionPane.showMessageDialog(null, panel, "Change password", JOptionPane.PLAIN_MESSAGE);
+
+            pswrd = pswrdField.getText();
+            confirmpswrd = confirmpswrdField.getText();
         }
-    }
 
+            try {
+                boolean updated;
+                updated = ManagerDao.changePassword(pswrd, manager.getIdManager());
+                if (updated) {
+                    JOptionPane.showMessageDialog(null, "Password updated successfully");
+                }
+            } catch (DataBaseException e) {
+                throw new RuntimeException(e);
+            }
+
+    }
 
 
 }
