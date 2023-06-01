@@ -48,6 +48,20 @@ public class Manager {
         this.password = BCrypt.hashpw(password, salt);
     }
 
+    public Manager(String firstName, String lastName, String phoneNumber, String adress, Genre genre, String email, String password, boolean keepMe) {
+        this.idManager = UUID.randomUUID().toString();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.adress = adress;
+        this.genre = genre;
+        this.email = email;
+        //password
+        String salt = BCrypt.gensalt();
+        this.password = BCrypt.hashpw(password, salt);
+        this.keepMe = keepMe;
+    }
+
 
     public String getIdManager() {
         return idManager;
@@ -109,5 +123,13 @@ public class Manager {
     public void setPassword(String password) {
         String salt = BCrypt.gensalt();
         this.password = BCrypt.hashpw(password, salt);
+    }
+
+    public boolean isKeepMe() {
+        return keepMe;
+    }
+
+    public void setKeepMe(boolean keepMe) {
+        this.keepMe = keepMe;
     }
 }

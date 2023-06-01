@@ -27,6 +27,7 @@ public class SignupGUI extends JDialog{
     private JLabel textFirstNameError;
     private JLabel textLastNameError;
     private JLabel textPhoneNumberError;
+    private JButton cancelButton;
 
 
     public SignupGUI(JFrame parent){
@@ -40,7 +41,7 @@ public class SignupGUI extends JDialog{
         setSize(360, 400);
 
 
-        // Load the image as a resource relative to the class
+        // Load the image
         URL imageUrl = getClass().getResource("/media/logo.png");
         if (imageUrl != null) {
             ImageIcon image = new ImageIcon(imageUrl);
@@ -57,6 +58,7 @@ public class SignupGUI extends JDialog{
                 }
             }
         });
+
         textFirstName.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -77,6 +79,7 @@ public class SignupGUI extends JDialog{
             }
 
         });
+
         textLastName.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -97,6 +100,7 @@ public class SignupGUI extends JDialog{
             }
 
         });
+
         textPhoneNumber.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -126,6 +130,18 @@ public class SignupGUI extends JDialog{
 
         });
 
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                try {
+                    new LoginGUI(null);
+                } catch (DataBaseException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
 
         setVisible(true);
     }
@@ -142,7 +158,7 @@ public class SignupGUI extends JDialog{
         if (manRadioButton.isSelected()) {gender = Manager.Genre.MAN;}
         else if (womanRadioButton.isSelected()){gender = Manager.Genre.WOMAN;}
 
-        Boolean autoSignIn = autoSignInCheckBox.isSelected();
+        boolean autoSignIn = autoSignInCheckBox.isSelected();
 
         // check if any field is empty
         if (email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty() || firstName.isEmpty()
@@ -171,10 +187,11 @@ public class SignupGUI extends JDialog{
                     "Try again", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Manager newManager = new Manager(firstName, lastName, phoneNumber, adress, gender, email, password);
-        manager = ManagerDao.signup(newManager);
 
-        if (manager != null) {
+        Manager newManager = new Manager(firstName, lastName, phoneNumber, adress, gender, email, password, autoSignIn);
+        Manager manager = ManagerDao.signup(newManager);
+
+        if (manager != null) { // TODO : check the logique
             if(manager.getIdManager()==null) {
                 JOptionPane.showMessageDialog(this,
                         "Email or phone number already exists!",
@@ -185,7 +202,7 @@ public class SignupGUI extends JDialog{
                         "New manager created successfully!",
                         "Done!", JOptionPane.PLAIN_MESSAGE);
                 dispose();
-                new HomeGUI(null, manager);
+                new LoginGUI(null);
             }
         }
         else {
@@ -195,13 +212,9 @@ public class SignupGUI extends JDialog{
         }
 
     }
-    Manager manager;
 
     public boolean isValidNameCharacter(char c) {
         return Character.isLetter(c) || c == ' ' || c == '-' || c == '\'' || Character.isWhitespace(c);
     }
 
-    public static void main(String[] args) {
-        new SignupGUI(null);
-    }
 }

@@ -3,6 +3,7 @@ package org.example.application;
 import org.example.database.DataBaseException;
 import org.example.database.ManagerDao;
 import org.example.models.Manager;
+import org.example.utils.EmailSender;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -82,6 +83,14 @@ public class LoginGUI extends JDialog{
                 public void actionPerformed(ActionEvent e) {
                     dispose();
                     new SignupGUI(null);
+                }
+            });
+
+            forgotPasswordButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    EmailSender emailSender = new EmailSender(txtUsername.getText());
+                    emailSender.SendEmail();
                 }
             });
 

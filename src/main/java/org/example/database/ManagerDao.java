@@ -107,12 +107,12 @@ public class ManagerDao {
             ResultSet rs = stm.executeQuery();
             if (rs.next()){
                 manager = new Manager();
-                System.out.println(manager);
+                System.out.println(manager.getIdManager());
                 return manager;
             }
 
-            sqlInsert = "insert into Manager(idManager, firstName, lastName, phoneNumber, adress, genre, email, password) " +
-                    "values(?,?,?,?,?,?,?,?)";
+            sqlInsert = "insert into Manager(idManager, firstName, lastName, phoneNumber, adress, genre, email, password, keepMe) " +
+                    "values(?,?,?,?,?,?,?,?,?)";
             //créer l'objet PreparedStatement
             stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
             //définir la valeur du paramètre de l'instruction SQL
@@ -124,6 +124,7 @@ public class ManagerDao {
             stm.setString(6, String.valueOf(pManager.getGenre()));
             stm.setString(7, pManager.getEmail());
             stm.setString(8, pManager.getPassword());
+            stm.setBoolean(9, pManager.isKeepMe());
             //Executer l'instruction SQL
             boolean hasResultSet = stm.execute();
             if (hasResultSet) {
