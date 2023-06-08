@@ -14,8 +14,8 @@ public class EmailSender {
 
     public void SendEmail(){
         // Sender's email configuration
-        String senderEmail = "tkinter.gschool@gmail.com";
-        String senderPassword = "vizjfzoeihmxchqu";
+        String senderEmail = "";
+        String senderPassword = "";
 
         // Email properties
         Properties properties = new Properties();

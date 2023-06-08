@@ -80,25 +80,6 @@ public class ExcelExporter {
 		return data;
 
 	}
-
-	public static void main(String[] args) throws Exception{
-
-		/*//Création d'un fichier excel
-		ExcelExporter ex = new ExcelExporter(new String[]{"nom","prenom"},new String[][]{{"boudaa","Tarik"},{"Elyousfi","Mohamed"}}, "liste");
-		ex.export("C:\\Users\\Microsoft\\Desktop\\test2023.xlsx");
-
-		//lecture du fichier excel, chaque ligne est présentée sous forme de ArrayList<Object>
-		//donc pour présenter toutes les lignes on peut utilisr une liste de liste, soit : List<ArrayList<Object>>
-		List<ArrayList<Object>> data =    ex.readFromExcel("C:\\Users\\Microsoft\\Desktop\\test2023.xlsx", 0);
-
-		for(int i =0; i< data.size(); i++){
-			for(int j=0; j< data.get(i).size(); j++){
-				System.out.print(data.get(i).get(j)+" | ");
-			}
-			System.out.println();
-		}*/
-
-	}
 	public void export(String fileName) throws IOException {
 		writeHeaderLine();
 		writeDataLines();

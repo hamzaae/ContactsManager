@@ -51,11 +51,9 @@ public class DBInstaller {
                                     (idGroup VARCHAR(255),
                                     nomGroup VARCHAR(255),
                                     PRIMARY KEY (idGroup));
-                    CREATE TABLE R
-                                    (id_Contact VARCHAR(255),
-                                    id_Group VARCHAR(255),
-                                    FOREIGN KEY (id_Contact) REFERENCES CONTACT(id),
-                                    FOREIGN KEY (id_Group) REFERENCES GROUPTABLE(idGroup));
+                    (idgroup, nomgroup) VALUES ('0', 'NONE');
+                    (idgroup, nomgroup) VALUES ('1', 'AUTO');
+                    (idgroup, nomgroup) VALUES ('2', 'NEW');
                     """;
             Statement stmt = con.createStatement();
             stmt.executeUpdate(sql);
