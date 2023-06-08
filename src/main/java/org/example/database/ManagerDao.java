@@ -114,7 +114,7 @@ public class ManagerDao {
             sqlInsert = "insert into Manager(idManager, firstName, lastName, phoneNumber, adress, genre, email, password, keepMe) " +
                     "values(?,?,?,?,?,?,?,?,?)";
             //créer l'objet PreparedStatement
-            stm = c.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            stm = c.prepareStatement(sqlInsert);
             //définir la valeur du paramètre de l'instruction SQL
             stm.setString(1, pManager.getIdManager());
             stm.setString(2, pManager.getFirstName());

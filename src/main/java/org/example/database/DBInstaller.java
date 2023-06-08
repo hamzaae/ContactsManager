@@ -33,7 +33,8 @@ public class DBInstaller {
                                     genre VARCHAR(10),
                                     email VARCHAR(100),
                                     password VARCHAR(255),
-                                    PRIMARY KEY (idManager));
+                                    PRIMARY KEY (idManager),
+                                    keepme boolean);
                     CREATE TABLE CONTACT
                                     (id VARCHAR(255),
                                     nom VARCHAR(255),
@@ -51,9 +52,10 @@ public class DBInstaller {
                                     (idGroup VARCHAR(255),
                                     nomGroup VARCHAR(255),
                                     PRIMARY KEY (idGroup));
-                    (idgroup, nomgroup) VALUES ('0', 'NONE');
-                    (idgroup, nomgroup) VALUES ('1', 'AUTO');
-                    (idgroup, nomgroup) VALUES ('2', 'NEW');
+                    INSERT INTO GROUPTABLE (idgroup, nomgroup) VALUES
+                      ('0', 'NONE'),
+                      ('1', 'AUTO'),
+                      ('2', 'NEW');
                     """;
             Statement stmt = con.createStatement();
             stmt.executeUpdate(sql);

@@ -191,25 +191,20 @@ public class SignupGUI extends JDialog{
         Manager newManager = new Manager(firstName, lastName, phoneNumber, adress, gender, email, password, autoSignIn);
         Manager manager = ManagerDao.signup(newManager);
 
-        if (manager != null) { // TODO : check the logique
-            if(manager.getIdManager()==null) {
-                JOptionPane.showMessageDialog(this,
-                        "Email or phone number already exists!",
-                        "Try again", JOptionPane.ERROR_MESSAGE);
-            }
-            else{
+        // TODO : check the logique
+            if(manager==null) {
                 JOptionPane.showMessageDialog(this,
                         "New manager created successfully!",
                         "Done!", JOptionPane.PLAIN_MESSAGE);
                 dispose();
                 new LoginGUI(null);
             }
-        }
-        else {
-            JOptionPane.showMessageDialog(this,
-                    "An error occurred, please try again later",
-                    "Sorry", JOptionPane.ERROR_MESSAGE);
-        }
+            else{
+                JOptionPane.showMessageDialog(this,
+                        "An error occured, or the manager already exists!",
+                        "Try again", JOptionPane.ERROR_MESSAGE);
+            }
+
 
     }
 
