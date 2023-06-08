@@ -21,11 +21,11 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class HomeGUI extends JDialog{
     private Manager manager;
     private String selectedContactId;
-    private JButton RESETButton;
     private JButton logOutButton;
     private JButton groupsButton;
     private JButton editButton;
@@ -209,6 +209,7 @@ public class HomeGUI extends JDialog{
             public void actionPerformed(ActionEvent e) {
                 String searchBy = String.valueOf(comboBoxSearchBy.getSelectedItem());
                 String searchFor = inputSearchBy.getText();
+                System.out.println(searchBy+ " " +searchFor);
                 try {
                     if (searchFor.equals("")) {
                         showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
@@ -325,6 +326,7 @@ public class HomeGUI extends JDialog{
                         GroupDao.deleteGroup(group);
                         showAllContacts(ContactDao.getAllContacts(manager.getIdManager()));
                         comboBoxGroup.removeItem(groupItem);
+                        comboBoxGroup.setSelectedIndex(0);
                         managerNbrGroups.setText(String.valueOf(GroupDao.getAllGroupsCount()));
                     } catch (DataBaseException ex) {
                         throw new RuntimeException(ex);
@@ -343,9 +345,11 @@ public class HomeGUI extends JDialog{
 
 
     private void initGroupsBox() {
-        ArrayList<String> listGroups = null;
+        ArrayList<String> listGroups;
+        comboBoxGroup.removeAllItems();
         try {
             listGroups = GroupDao.getAllGroups();
+            managerNbrGroups.setText(String.valueOf(GroupDao.getAllGroupsCount()));
         } catch (DataBaseException e) {
             throw new RuntimeException(e);
         }
@@ -429,7 +433,6 @@ public class HomeGUI extends JDialog{
     }
 
     private void addContact() throws DataBaseException {
-        Contact contact = null;
         String firstName = inputFirstName.getText();
         String lastName = inputLastName.getText();
         String personalNumber = inputPersonalNumber.getText();
@@ -479,6 +482,7 @@ public class HomeGUI extends JDialog{
             group = "0";
         } else if (group.equals("AUTO")) {
             group = GroupDao.rechercherGroupParNom0(lastName);
+            comboBoxGroup.addItem(group);
         } else if (group.equals("NEW")) {
             group = "";
             while (group.equals("")){
@@ -493,8 +497,8 @@ public class HomeGUI extends JDialog{
         //
         Contact newContact = new Contact(firstName,lastName,personalNumber,professionalNumber,adress,personalEmail,
                 professionalEmail,gender,manager.getIdManager(), group);
-        contact = ContactDao.create(newContact, manager.getIdManager());
-        if (contact != null) {
+        boolean created = ContactDao.create(newContact, manager.getIdManager());
+        if (!created) {
 
                 JOptionPane.showMessageDialog(this,
                         "New Contact added successfully!",
@@ -559,25 +563,32 @@ public class HomeGUI extends JDialog{
             group = "0";
         } else if (group.equals("AUTO")) {
             group = GroupDao.rechercherGroupParNom0(lastName);
+            initGroupsBox();
         } else if (group.equals("NEW")) {
             group = "";
             while (group.equals("")){
                 group = JOptionPane.showInputDialog("New Group Name?");
             }
             comboBoxGroup.addItem(group);
+            comboBoxGroup.setSelectedItem(group);
             group = GroupDao.addGroup(group);
+            initGroupsBox();
         }
         else{
-            group = GroupDao.rechercherGroupParNom0(lastName);
+            comboBoxGroup.setSelectedItem(group);
+            group = GroupDao.rechercherGroupParNom0(group);
         }
         //
         Contact contact = new Contact(selectedContactId,firstName,lastName,personalNumber,professionalNumber,adress,personalEmail,
                 professionalEmail,gender,manager.getIdManager(), group);
-        if(!ContactDao.update(contact)){
+        if(ContactDao.update(contact)){
             JOptionPane.showMessageDialog(this,
                     "Contact has not been updated,  an error occured!",
                     "Try again", JOptionPane.ERROR_MESSAGE);
-            return;
+        }else{
+            JOptionPane.showMessageDialog(this,
+                    "Contact has been updated successfully",
+                    "", JOptionPane.INFORMATION_MESSAGE);
         }
 
 
@@ -592,11 +603,19 @@ public class HomeGUI extends JDialog{
         panel.add(new JLabel("Confirm password:"));
         panel.add(confirmpswrdField);
 
+
         // Use JOptionPane.showMessageDialog instead of JOptionPane.showOptionDialog
         JOptionPane.showMessageDialog(null, panel, "Change password", JOptionPane.PLAIN_MESSAGE);
 
         String pswrd = pswrdField.getText();
         String confirmpswrd = confirmpswrdField.getText();
+        while(pswrd.equals("")){
+            JOptionPane.showMessageDialog(panel, "Empty Password");
+            JOptionPane.showMessageDialog(null, panel, "Change password", JOptionPane.PLAIN_MESSAGE);
+
+            pswrd = pswrdField.getText();
+            confirmpswrd = confirmpswrdField.getText();
+        }
         while(!pswrd.equals(confirmpswrd)){
             JOptionPane.showMessageDialog(panel, "Password and confirm password mismatch");
             JOptionPane.showMessageDialog(null, panel, "Change password", JOptionPane.PLAIN_MESSAGE);

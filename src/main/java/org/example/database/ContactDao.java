@@ -70,8 +70,9 @@ public class ContactDao {
 
         try {
             Connection c = DBConnection.getInstance();
-            PreparedStatement stm = c.prepareStatement("SELECT * from contact where upper(nom)=?");
-            stm.setString(1, searchFor.toUpperCase());
+            PreparedStatement stm = c.prepareStatement("SELECT * FROM contact WHERE SOUNDEX(nom) = SOUNDEX(?) OR SOUNDEX(prenom) = SOUNDEX(?)");
+            stm.setString(1, searchFor);
+            stm.setString(2, searchFor);
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 list.add(resultToContact(rs));
@@ -120,17 +121,18 @@ public class ContactDao {
         try {
             Connection c = DBConnection.getInstance();
             PreparedStatement stm = c.prepareStatement("SELECT * from grouptable where upper(nomgroup)=?");
-            stm.setString(1, searchFor);
+            stm.setString(1, searchFor.toUpperCase());
             ResultSet rs = stm.executeQuery();
-            String idGroup = null;
-            idGroup = rs.getString("idgroup");
-            if (idGroup != null) {
-                stm = c.prepareStatement("SELECT * from contact where group_id=?");
-                stm.setString(1, idGroup);
-                rs = stm.executeQuery();
-                while (rs.next()) {
-                    list.add(resultToContact(rs));
-
+            String idGroup;
+            if (rs.next()) { // Move the cursor to the first row
+                idGroup = rs.getString("idgroup");
+                if (idGroup != null) {
+                    stm = c.prepareStatement("SELECT * from contact where group_id=?");
+                    stm.setString(1, idGroup);
+                    rs = stm.executeQuery();
+                    while (rs.next()) {
+                        list.add(resultToContact(rs));
+                    }
                 }
             }
             rs.close();
@@ -170,7 +172,7 @@ public class ContactDao {
         return list;
     }
 
-    public static Contact create(Contact pContact, String pmanagerId) throws DataBaseException{
+    public static boolean create(Contact pContact, String pmanagerId) throws DataBaseException{
         Contact contact = null;
         try {
             //Récupérer la connexion à la base de données
@@ -193,13 +195,7 @@ public class ContactDao {
             stm.setString(11, pContact.getGroupId());
             //Executer l'instruction SQL
 
-            boolean hasResultSet = stm.execute();
-            if (hasResultSet) {
-                ResultSet resultSet = stm.getResultSet();
-                contact = resultToContact(resultSet);
-                System.out.println(contact);
-                return contact;
-            }
+            return stm.execute();
 
         } catch (SQLException ex) {
             //tracer l'erreur
@@ -207,7 +203,7 @@ public class ContactDao {
             //remonter l'erreur
             throw new DataBaseException(ex);
         }
-        return contact;
+
     }
 
     public static ArrayList<Contact> getAllContactsSorted(String idManager) throws DataBaseException {
@@ -262,4 +258,6 @@ public class ContactDao {
                 rs.getString("email_profess"), Contact.Genre.valueOf(rs.getString("genre")),
                 rs.getString("id_manager"), rs.getString("group_id"));
     }
+
+
 }
